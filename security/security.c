@@ -126,7 +126,9 @@ int __init register_security(struct security_operations *ops)
 	if (security_ops != &default_security_ops)
 		return -EAGAIN;
 
+	pax_open_kernel();
 	security_ops = ops;
+	pax_close_kernel();
 
 	return 0;
 }
