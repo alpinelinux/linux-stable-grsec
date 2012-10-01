@@ -157,7 +157,7 @@ static ssize_t iwl_dbgfs_clear_traffic_statistics_write(struct file *file,
 	struct iwl_priv *priv = file->private_data;
 	u32 clear_flag;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 
 	memset(buf, 0, sizeof(buf));
 	buf_size = min(count, sizeof(buf) -  1);
@@ -305,7 +305,7 @@ static ssize_t iwl_dbgfs_sram_write(struct file *file,
 {
 	struct iwl_priv *priv = file->private_data;
 	char buf[64];
-	int buf_size;
+	size_t buf_size;
 	u32 offset, len;
 
 	memset(buf, 0, sizeof(buf));
@@ -588,7 +588,7 @@ static ssize_t iwl_dbgfs_rx_handlers_write(struct file *file,
 	struct iwl_priv *priv = file->private_data;
 
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 	u32 reset_flag;
 
 	memset(buf, 0, sizeof(buf));
@@ -669,7 +669,7 @@ static ssize_t iwl_dbgfs_disable_ht40_write(struct file *file,
 {
 	struct iwl_priv *priv = file->private_data;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 	int ht40;
 
 	memset(buf, 0, sizeof(buf));
@@ -724,7 +724,7 @@ static ssize_t iwl_dbgfs_sleep_level_override_write(struct file *file,
 {
 	struct iwl_priv *priv = file->private_data;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 	int value;
 
 	memset(buf, 0, sizeof(buf));
@@ -882,7 +882,7 @@ static ssize_t iwl_dbgfs_traffic_log_write(struct file *file,
 {
 	struct iwl_priv *priv = file->private_data;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 	int traffic_log;
 
 	memset(buf, 0, sizeof(buf));
@@ -2087,7 +2087,7 @@ static ssize_t iwl_dbgfs_clear_ucode_statistics_write(struct file *file,
 {
 	struct iwl_priv *priv = file->private_data;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 	int clear;
 
 	memset(buf, 0, sizeof(buf));
@@ -2132,7 +2132,7 @@ static ssize_t iwl_dbgfs_ucode_tracing_write(struct file *file,
 {
 	struct iwl_priv *priv = file->private_data;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 	int trace;
 
 	memset(buf, 0, sizeof(buf));
@@ -2203,7 +2203,7 @@ static ssize_t iwl_dbgfs_missed_beacon_write(struct file *file,
 {
 	struct iwl_priv *priv = file->private_data;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 	int missed;
 
 	memset(buf, 0, sizeof(buf));
@@ -2244,7 +2244,7 @@ static ssize_t iwl_dbgfs_plcp_delta_write(struct file *file,
 
 	struct iwl_priv *priv = file->private_data;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 	int plcp;
 
 	memset(buf, 0, sizeof(buf));
@@ -2298,7 +2298,7 @@ static ssize_t iwl_dbgfs_force_reset_write(struct file *file,
 
 	struct iwl_priv *priv = file->private_data;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 	int reset, ret;
 
 	memset(buf, 0, sizeof(buf));
@@ -2324,7 +2324,7 @@ static ssize_t iwl_dbgfs_txfifo_flush_write(struct file *file,
 
 	struct iwl_priv *priv = file->private_data;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 	int flush;
 
 	memset(buf, 0, sizeof(buf));
@@ -2348,7 +2348,7 @@ static ssize_t iwl_dbgfs_wd_timeout_write(struct file *file,
 {
 	struct iwl_priv *priv = file->private_data;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 	int timeout;
 
 	memset(buf, 0, sizeof(buf));
@@ -2437,7 +2437,7 @@ static ssize_t iwl_dbgfs_protection_mode_write(struct file *file,
 
 	struct iwl_priv *priv = file->private_data;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 	int rts;
 
 	if (!cfg(priv)->ht_params)
@@ -2462,7 +2462,7 @@ static ssize_t iwl_dbgfs_echo_test_write(struct file *file,
 {
 	struct iwl_priv *priv = file->private_data;
 	char buf[8];
-	int buf_size;
+	size_t buf_size;
 
 	memset(buf, 0, sizeof(buf));
 	buf_size = min(count, sizeof(buf) -  1);
