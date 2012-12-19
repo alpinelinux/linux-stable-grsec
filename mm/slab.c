@@ -4695,7 +4695,7 @@ bool is_usercopy_object(const void *ptr)
 	if (!PageSlab(page))
 		return false;
 
-	cachep = page_get_cache(page);
+	cachep = page->slab_cache;
 	return cachep->flags & SLAB_USERCOPY;
 }
 
@@ -4719,7 +4719,7 @@ const char *check_heap_object(const void *ptr, unsigned long n, bool to)
 	if (!PageSlab(page))
 		return NULL;
 
-	cachep = page_get_cache(page);
+	cachep = page->slab_cache;
 	if (!(cachep->flags & SLAB_USERCOPY))
 		return cachep->name;
 
