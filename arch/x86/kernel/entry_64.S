@@ -1197,7 +1197,7 @@ retint_swapgs:		/* return to user-space */
 retint_restore_args:	/* return to kernel space */
 	DISABLE_INTERRUPTS(CLBR_ANY)
 	pax_exit_kernel
-	pax_force_retaddr RIP-ARGOFFSET
+	pax_force_retaddr (RIP-ARGOFFSET)
 	/*
 	 * The iretq could re-enable interrupts:
 	 */
