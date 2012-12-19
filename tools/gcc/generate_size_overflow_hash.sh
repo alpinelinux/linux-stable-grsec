@@ -31,28 +31,27 @@ do
 done
 
 create_defines() {
-	for i in `seq 1 10`
+	for i in `seq 0 31`
 	do
 		echo -e "#define PARAM"$i" (1U << "$i")" >> "$header1"
 	done
 	echo >> "$header1"
 }
 
-create_structs () {
+create_structs() {
 	rm -f "$header1"
 
 	create_defines
 
 	cat "$database" | while read data
 	do
-		data_array=(${data// /?})
-		data_array=(${data_array[@]//+/ })
+		data_array=($data)
 		struct_hash_name="${data_array[0]}"
-		funcn="${data_array[1]//\?/ }"
+		funcn="${data_array[1]}"
 		params="${data_array[2]}"
-		next="${data_array[5]}"
+		next="${data_array[4]}"
 
-		echo "struct size_overflow_hash $struct_hash_name = {" >> "$header1"
+		echo "const struct size_overflow_hash $struct_hash_name = {" >> "$header1"
 
 		echo -e "\t.next\t= $next,\n\t.name\t= \"$funcn\"," >> "$header1"
 		echo -en "\t.param\t= " >> "$header1"
@@ -66,18 +65,17 @@ create_structs () {
 	done
 }
 
-create_headers () {
-	echo "struct size_overflow_hash *size_overflow_hash[$n] = {" >> "$header1"
+create_headers() {
+	echo "const struct size_overflow_hash * const size_overflow_hash[$n] = {" >> "$header1"
 }
 
-create_array_elements () {
+create_array_elements() {
 	index=0
-	grep -v "nohasharray" $database | sort -n -t '+' -k 4 | while read data
+	grep -v "nohasharray" $database | sort -n -k 4 | while read data
 	do
-		data_array=(${data// /?})
-		data_array=(${data_array//+/ })
+		data_array=($data)
 		i="${data_array[3]}"
-		hash="${data_array[4]}"
+		hash="${data_array[0]}"
 		while [[ $index -lt $i ]]
 		do
 			echo -e "\t["$index"]\t= NULL," >> "$header1"
