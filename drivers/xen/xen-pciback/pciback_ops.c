@@ -9,6 +9,8 @@
 #include <xen/events.h>
 #include <linux/sched.h>
 #include "pciback.h"
+#include <linux/ratelimit.h>
+#include <linux/printk.h>
 
 int verbose_request;
 module_param(verbose_request, int, 0644);
@@ -144,10 +146,9 @@ int xen_pcibk_enable_msi(struct xen_pcibk_device *pdev,
 	status = pci_enable_msi(dev);
 
 	if (status) {
-		if (printk_ratelimit())
-			printk(DRV_NAME ": %s: " \
-				"error enabling MSI for guest %u: err %d\n",
-				pci_name(dev), pdev->xdev->otherend_id, status);
+		pr_warn_ratelimited(DRV_NAME ": %s: error enabling MSI for guest %u: err %d\n",
+				    pci_name(dev), pdev->xdev->otherend_id,
+				    status);
 		op->value = 0;
 		return XEN_PCI_ERR_op_failed;
 	}
@@ -226,10 +227,9 @@ int xen_pcibk_enable_msix(struct xen_pcibk_device *pdev,
 						op->msix_entries[i].vector);
 		}
 	} else
-		if (printk_ratelimit())
-			printk(DRV_NAME ": %s: " \
-				"error enabling MSI-X for guest %u: err %d!\n",
-				pci_name(dev), pdev->xdev->otherend_id, result);
+		pr_warn_ratelimited(DRV_NAME ": %s: error enabling MSI-X for guest %u: err %d!\n",
+				    pci_name(dev), pdev->xdev->otherend_id,
+				    result);
 	kfree(entries);
 
 	op->value = result;
