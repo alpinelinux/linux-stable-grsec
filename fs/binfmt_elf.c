@@ -801,6 +801,10 @@ static int load_elf_binary(struct linux_binprm *bprm)
 			 * default mmap base, as well as whatever program they
 			 * might try to exec.  This is because the brk will
 			 * follow the loader, and is not movable.  */
+			if (elf_interpreter)
+				load_bias = 0x00400000UL;
+			else
+				load_bias = ELF_ET_DYN_BASE;
 #ifdef CONFIG_ARCH_BINFMT_ELF_RANDOMIZE_PIE
 			/* Memory randomization might have been switched off
 			 * in runtime via sysctl or explicit setting of
@@ -809,13 +813,14 @@ static int load_elf_binary(struct linux_binprm *bprm)
 			 * load_bias value in order to establish proper
 			 * non-randomized mappings.
 			 */
-			if (current->flags & PF_RANDOMIZE)
-				load_bias = 0;
-			else
-				load_bias = ELF_PAGESTART(ELF_ET_DYN_BASE - vaddr);
-#else
-			load_bias = ELF_PAGESTART(ELF_ET_DYN_BASE - vaddr);
+			if (current->flags & PF_RANDOMIZE) {
+				if (elf_interpreter)
+					load_bias += (get_random_int() & STACK_RND_MASK) << PAGE_SHIFT;
+				else
+					load_bias = 0;
+			}
 #endif
+			load_bias = ELF_PAGESTART(load_bias - vaddr);
 			total_size = total_mapping_size(elf_phdata,
 							loc->elf_ex.e_phnum);
 			if (!total_size) {
