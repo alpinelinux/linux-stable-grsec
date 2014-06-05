@@ -3320,10 +3320,10 @@ static int sctp_setsockopt_auth_chunk(struct sock *sk,
 				      char __user *optval,
 				      unsigned int optlen)
 {
-	struct net *net = sock_net(sk);
+	struct sctp_endpoint *ep = sctp_sk(sk)->ep;
 	struct sctp_authchunk val;
 
-	if (!net->sctp.auth_enable)
+	if (!ep->auth_enable)
 		return -EACCES;
 
 	if (optlen != sizeof(struct sctp_authchunk))
@@ -3340,7 +3340,7 @@ static int sctp_setsockopt_auth_chunk(struct sock *sk,
 	}
 
 	/* add this chunk id to the endpoint */
-	return sctp_auth_ep_add_chunkid(sctp_sk(sk)->ep, val.sauth_chunk);
+	return sctp_auth_ep_add_chunkid(ep, val.sauth_chunk);
 }
 
 /*
@@ -3353,12 +3353,12 @@ static int sctp_setsockopt_hmac_ident(struct sock *sk,
 				      char __user *optval,
 				      unsigned int optlen)
 {
-	struct net *net = sock_net(sk);
+	struct sctp_endpoint *ep = sctp_sk(sk)->ep;
 	struct sctp_hmacalgo *hmacs;
 	u32 idents;
 	int err;
 
-	if (!net->sctp.auth_enable)
+	if (!ep->auth_enable)
 		return -EACCES;
 
 	if (optlen < sizeof(struct sctp_hmacalgo))
@@ -3375,7 +3375,7 @@ static int sctp_setsockopt_hmac_ident(struct sock *sk,
 		goto out;
 	}
 
-	err = sctp_auth_ep_set_hmacs(sctp_sk(sk)->ep, hmacs);
+	err = sctp_auth_ep_set_hmacs(ep, hmacs);
 out:
 	kfree(hmacs);
 	return err;
@@ -3391,12 +3391,12 @@ static int sctp_setsockopt_auth_key(struct sock *sk,
 				    char __user *optval,
 				    unsigned int optlen)
 {
-	struct net *net = sock_net(sk);
+	struct sctp_endpoint *ep = sctp_sk(sk)->ep;
 	struct sctp_authkey *authkey;
 	struct sctp_association *asoc;
 	int ret;
 
-	if (!net->sctp.auth_enable)
+	if (!ep->auth_enable)
 		return -EACCES;
 
 	if (optlen <= sizeof(struct sctp_authkey))
@@ -3417,7 +3417,7 @@ static int sctp_setsockopt_auth_key(struct sock *sk,
 		goto out;
 	}
 
-	ret = sctp_auth_set_key(sctp_sk(sk)->ep, asoc, authkey);
+	ret = sctp_auth_set_key(ep, asoc, authkey);
 out:
 	kzfree(authkey);
 	return ret;
@@ -3433,11 +3433,11 @@ static int sctp_setsockopt_active_key(struct sock *sk,
 				      char __user *optval,
 				      unsigned int optlen)
 {
-	struct net *net = sock_net(sk);
+	struct sctp_endpoint *ep = sctp_sk(sk)->ep;
 	struct sctp_authkeyid val;
 	struct sctp_association *asoc;
 
-	if (!net->sctp.auth_enable)
+	if (!ep->auth_enable)
 		return -EACCES;
 
 	if (optlen != sizeof(struct sctp_authkeyid))
@@ -3449,8 +3449,7 @@ static int sctp_setsockopt_active_key(struct sock *sk,
 	if (!asoc && val.scact_assoc_id && sctp_style(sk, UDP))
 		return -EINVAL;
 
-	return sctp_auth_set_active_key(sctp_sk(sk)->ep, asoc,
-					val.scact_keynumber);
+	return sctp_auth_set_active_key(ep, asoc, val.scact_keynumber);
 }
 
 /*
@@ -3462,11 +3461,11 @@ static int sctp_setsockopt_del_key(struct sock *sk,
 				   char __user *optval,
 				   unsigned int optlen)
 {
-	struct net *net = sock_net(sk);
+	struct sctp_endpoint *ep = sctp_sk(sk)->ep;
 	struct sctp_authkeyid val;
 	struct sctp_association *asoc;
 
-	if (!net->sctp.auth_enable)
+	if (!ep->auth_enable)
 		return -EACCES;
 
 	if (optlen != sizeof(struct sctp_authkeyid))
@@ -3478,8 +3477,7 @@ static int sctp_setsockopt_del_key(struct sock *sk,
 	if (!asoc && val.scact_assoc_id && sctp_style(sk, UDP))
 		return -EINVAL;
 
-	return sctp_auth_del_key_id(sctp_sk(sk)->ep, asoc,
-				    val.scact_keynumber);
+	return sctp_auth_del_key_id(ep, asoc, val.scact_keynumber);
 
 }
 
@@ -5381,16 +5379,16 @@ static int sctp_getsockopt_maxburst(struct sock *sk, int len,
 static int sctp_getsockopt_hmac_ident(struct sock *sk, int len,
 				    char __user *optval, int __user *optlen)
 {
-	struct net *net = sock_net(sk);
+	struct sctp_endpoint *ep = sctp_sk(sk)->ep;
 	struct sctp_hmacalgo  __user *p = (void __user *)optval;
 	struct sctp_hmac_algo_param *hmacs;
 	__u16 data_len = 0;
 	u32 num_idents;
 
-	if (!net->sctp.auth_enable)
+	if (!ep->auth_enable)
 		return -EACCES;
 
-	hmacs = sctp_sk(sk)->ep->auth_hmacs_list;
+	hmacs = ep->auth_hmacs_list;
 	data_len = ntohs(hmacs->param_hdr.length) - sizeof(sctp_paramhdr_t);
 
 	if (len < sizeof(struct sctp_hmacalgo) + data_len)
@@ -5411,11 +5409,11 @@ static int sctp_getsockopt_hmac_ident(struct sock *sk, int len,
 static int sctp_getsockopt_active_key(struct sock *sk, int len,
 				    char __user *optval, int __user *optlen)
 {
-	struct net *net = sock_net(sk);
+	struct sctp_endpoint *ep = sctp_sk(sk)->ep;
 	struct sctp_authkeyid val;
 	struct sctp_association *asoc;
 
-	if (!net->sctp.auth_enable)
+	if (!ep->auth_enable)
 		return -EACCES;
 
 	if (len < sizeof(struct sctp_authkeyid))
@@ -5430,7 +5428,7 @@ static int sctp_getsockopt_active_key(struct sock *sk, int len,
 	if (asoc)
 		val.scact_keynumber = asoc->active_key_id;
 	else
-		val.scact_keynumber = sctp_sk(sk)->ep->active_key_id;
+		val.scact_keynumber = ep->active_key_id;
 
 	len = sizeof(struct sctp_authkeyid);
 	if (put_user(len, optlen))
@@ -5444,7 +5442,7 @@ static int sctp_getsockopt_active_key(struct sock *sk, int len,
 static int sctp_getsockopt_peer_auth_chunks(struct sock *sk, int len,
 				    char __user *optval, int __user *optlen)
 {
-	struct net *net = sock_net(sk);
+	struct sctp_endpoint *ep = sctp_sk(sk)->ep;
 	struct sctp_authchunks __user *p = (void __user *)optval;
 	struct sctp_authchunks val;
 	struct sctp_association *asoc;
@@ -5452,7 +5450,7 @@ static int sctp_getsockopt_peer_auth_chunks(struct sock *sk, int len,
 	u32    num_chunks = 0;
 	char __user *to;
 
-	if (!net->sctp.auth_enable)
+	if (!ep->auth_enable)
 		return -EACCES;
 
 	if (len < sizeof(struct sctp_authchunks))
@@ -5488,7 +5486,7 @@ num:
 static int sctp_getsockopt_local_auth_chunks(struct sock *sk, int len,
 				    char __user *optval, int __user *optlen)
 {
-	struct net *net = sock_net(sk);
+	struct sctp_endpoint *ep = sctp_sk(sk)->ep;
 	struct sctp_authchunks __user *p = (void __user *)optval;
 	struct sctp_authchunks val;
 	struct sctp_association *asoc;
@@ -5496,7 +5494,7 @@ static int sctp_getsockopt_local_auth_chunks(struct sock *sk, int len,
 	u32    num_chunks = 0;
 	char __user *to;
 
-	if (!net->sctp.auth_enable)
+	if (!ep->auth_enable)
 		return -EACCES;
 
 	if (len < sizeof(struct sctp_authchunks))
@@ -5513,7 +5511,7 @@ static int sctp_getsockopt_local_auth_chunks(struct sock *sk, int len,
 	if (asoc)
 		ch = (struct sctp_chunks_param*)asoc->c.auth_chunks;
 	else
-		ch = sctp_sk(sk)->ep->auth_chunk_list;
+		ch = ep->auth_chunk_list;
 
 	if (!ch)
 		goto num;
@@ -6595,6 +6593,46 @@ static void __sctp_write_space(struct sctp_association *asoc)
 	}
 }
 
+static void sctp_wake_up_waiters(struct sock *sk,
+				 struct sctp_association *asoc)
+{
+	struct sctp_association *tmp = asoc;
+
+	/* We do accounting for the sndbuf space per association,
+	 * so we only need to wake our own association.
+	 */
+	if (asoc->ep->sndbuf_policy)
+		return __sctp_write_space(asoc);
+
+	/* If association goes down and is just flushing its
+	 * outq, then just normally notify others.
+	 */
+	if (asoc->base.dead)
+		return sctp_write_space(sk);
+
+	/* Accounting for the sndbuf space is per socket, so we
+	 * need to wake up others, try to be fair and in case of
+	 * other associations, let them have a go first instead
+	 * of just doing a sctp_write_space() call.
+	 *
+	 * Note that we reach sctp_wake_up_waiters() only when
+	 * associations free up queued chunks, thus we are under
+	 * lock and the list of associations on a socket is
+	 * guaranteed not to change.
+	 */
+	for (tmp = list_next_entry(tmp, asocs); 1;
+	     tmp = list_next_entry(tmp, asocs)) {
+		/* Manually skip the head element. */
+		if (&tmp->asocs == &((sctp_sk(sk))->ep->asocs))
+			continue;
+		/* Wake up association. */
+		__sctp_write_space(tmp);
+		/* We've reached the end. */
+		if (tmp == asoc)
+			break;
+	}
+}
+
 /* Do accounting for the sndbuf space.
  * Decrement the used sndbuf space of the corresponding association by the
  * data size which was just transmitted(freed).
@@ -6622,7 +6660,7 @@ static void sctp_wfree(struct sk_buff *skb)
 	sk_mem_uncharge(sk, skb->truesize);
 
 	sock_wfree(skb);
-	__sctp_write_space(asoc);
+	sctp_wake_up_waiters(sk, asoc);
 
 	sctp_association_put(asoc);
 }
