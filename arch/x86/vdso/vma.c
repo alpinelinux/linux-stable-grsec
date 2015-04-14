@@ -97,6 +97,12 @@ static unsigned long vdso_addr(unsigned long start, unsigned len)
 	 */
 	addr = align_vdso_addr(addr);
 
+	/*
+	 * Forcibly align the final address in case we have a hardware
+	 * issue that requires alignment for performance reasons.
+	 */
+	addr = align_vdso_addr(addr);
+
 	return addr;
 #endif
 }
