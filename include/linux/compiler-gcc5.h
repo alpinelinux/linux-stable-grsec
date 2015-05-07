@@ -34,19 +34,16 @@
 #define __bos1(ptr)		__bos((ptr), 1)
 
 #ifdef CONSTIFY_PLUGIN
-#error not yet
 #define __no_const __attribute__((no_const))
 #define __do_const __attribute__((do_const))
 #endif
 
 #ifdef SIZE_OVERFLOW_PLUGIN
-#error not yet
 #define __size_overflow(...) __attribute__((size_overflow(__VA_ARGS__)))
 #define __intentional_overflow(...) __attribute__((intentional_overflow(__VA_ARGS__)))
 #endif
 
 #ifdef LATENT_ENTROPY_PLUGIN
-#error not yet
 #define __latent_entropy __attribute__((latent_entropy))
 #endif
 
