@@ -115,7 +115,7 @@ int dump_task_regs(struct task_struct *t, elf_gregset_t *elfregs);
    the loader.  We need to make sure that it is out of the way of the program
    that it will "exec", and that there is sufficient room for the brk.  */
 
-#define ELF_ET_DYN_BASE	(TASK_SIZE / 3 * 2)
+#define ELF_ET_DYN_BASE		(TASK_SIZE / 3 * 2)
 
 #ifdef CONFIG_PAX_ASLR
 #define PAX_ELF_ET_DYN_BASE	0x00008000UL
