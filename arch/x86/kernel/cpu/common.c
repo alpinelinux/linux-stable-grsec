@@ -286,7 +286,7 @@ static void setup_pcid(struct cpuinfo_x86 *c)
 	}
 
 	printk("PAX: PCID detected\n");
-	set_in_cr4(X86_CR4_PCIDE);
+	cr4_set_bits(X86_CR4_PCIDE);
 
 #ifdef CONFIG_PAX_MEMORY_UDEREF
 	pax_open_kernel();

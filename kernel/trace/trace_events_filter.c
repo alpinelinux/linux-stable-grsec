@@ -1050,6 +1050,9 @@ static void parse_init(struct filter_parse_state *ps,
 
 static char infix_next(struct filter_parse_state *ps)
 {
+	if (!ps->infix.cnt)
+		return 0;
+
 	ps->infix.cnt--;
 
 	return ps->infix.string[ps->infix.tail++];
@@ -1065,6 +1068,9 @@ static char infix_peek(struct filter_parse_state *ps)
 
 static void infix_advance(struct filter_parse_state *ps)
 {
+	if (!ps->infix.cnt)
+		return;
+
 	ps->infix.cnt--;
 	ps->infix.tail++;
 }
@@ -1370,8 +1376,12 @@ static int check_preds(struct filter_parse_state *ps)
 
 		if (elt->op == OP_AND || elt->op == OP_OR) {
 			n_logical_preds++;
+			cnt--;
 			continue;
 		}
+		// OP_NOT is not supported in this kernel, will get
+		// a reject here when it's backported
+		cnt--;
 		n_normal_preds++;
 	}
 
