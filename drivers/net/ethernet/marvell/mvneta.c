@@ -1435,7 +1435,7 @@ static int mvneta_rx(struct mvneta_port *pp, int rx_todo,
 		     struct mvneta_rx_queue *rxq)
 {
 	struct net_device *dev = pp->dev;
-	int rx_done, rx_filled;
+	int rx_done;
 	u32 rcvd_pkts = 0;
 	u32 rcvd_bytes = 0;
 
@@ -1446,7 +1446,6 @@ static int mvneta_rx(struct mvneta_port *pp, int rx_todo,
 		rx_todo = rx_done;
 
 	rx_done = 0;
-	rx_filled = 0;
 
 	/* Fairness NAPI loop */
 	while (rx_done < rx_todo) {
@@ -1457,7 +1456,6 @@ static int mvneta_rx(struct mvneta_port *pp, int rx_todo,
 		int rx_bytes, err;
 
 		rx_done++;
-		rx_filled++;
 		rx_status = rx_desc->status;
 		rx_bytes = rx_desc->data_size - (ETH_FCS_LEN + MVNETA_MH_SIZE);
 		data = (unsigned char *)rx_desc->buf_cookie;
@@ -1497,6 +1495,14 @@ static int mvneta_rx(struct mvneta_port *pp, int rx_todo,
 			continue;
 		}
 
+		/* Refill processing */
+		err = mvneta_rx_refill(pp, rx_desc);
+		if (err) {
+			netdev_err(dev, "Linux processing - Can't refill\n");
+			rxq->missed++;
+			goto err_drop_frame;
+		}
+
 		skb = build_skb(data, pp->frag_size > PAGE_SIZE ? 0 : pp->frag_size);
 		if (!skb)
 			goto err_drop_frame;
@@ -1516,14 +1522,6 @@ static int mvneta_rx(struct mvneta_port *pp, int rx_todo,
 		mvneta_rx_csum(pp, rx_status, skb);
 
 		napi_gro_receive(&pp->napi, skb);
-
-		/* Refill processing */
-		err = mvneta_rx_refill(pp, rx_desc);
-		if (err) {
-			netdev_err(dev, "Linux processing - Can't refill\n");
-			rxq->missed++;
-			rx_filled--;
-		}
 	}
 
 	if (rcvd_pkts) {
@@ -1536,7 +1534,7 @@ static int mvneta_rx(struct mvneta_port *pp, int rx_todo,
 	}
 
 	/* Update rxq management counters */
-	mvneta_rxq_desc_num_update(pp, rxq, rx_done, rx_filled);
+	mvneta_rxq_desc_num_update(pp, rxq, rx_done, rx_done);
 
 	return rx_done;
 }
