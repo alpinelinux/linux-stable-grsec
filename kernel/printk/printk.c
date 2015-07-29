@@ -466,7 +466,7 @@ static int log_store(int facility, int level,
 	return msg->text_len;
 }
 
-int dmesg_restrict = IS_ENABLED(CONFIG_SECURITY_DMESG_RESTRICT);
+int dmesg_restrict __read_only = IS_ENABLED(CONFIG_SECURITY_DMESG_RESTRICT);
 
 static int syslog_action_restricted(int type)
 {
